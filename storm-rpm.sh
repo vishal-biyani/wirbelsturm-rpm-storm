@@ -54,6 +54,7 @@ cd apache-storm-$STORM_VERSION
 fpm -s dir -t rpm -a all \
     -n storm \
     -v $STORM_VERSION \
+    --iteration "1.miguno" \
     --maintainer "$MAINTAINER" \
     --vendor "Storm Project" \
     --url http://storm-project.net \
