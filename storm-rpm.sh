@@ -17,10 +17,11 @@ MAINTAINER="<michael@michael-noll.com>"
 
 function print_usage() {
     myself=`basename $0`
-    echo "Usage: $myself <storm-zipball-download-url>"
+    echo "Usage: $myself <storm-zipball-download-url-or-local-path>"
     echo
     echo "Examples:"
     echo "  \$ $myself http://www.eu.apache.org/dist/incubator/storm/apache-storm-0.9.1-incubating/apache-storm-0.9.1-incubating.zip"
+    echo "  \$ $myself /local/path/to/apache-storm-0.9.1-incubating.zip"
 }
 
 if [ $# -ne 1 ]; then
@@ -46,7 +47,12 @@ cleanup_and_exit() {
 }
 
 # Download and extract the requested Storm release zipfile
-wget $STORM_DOWNLOAD_URL || cleanup_and_exit $?
+if [ -e "$STORM_DOWNLOAD_URL" ]; then
+    cp $STORM_DOWNLOAD_URL .
+else
+    wget $STORM_DOWNLOAD_URL || cleanup_and_exit $?
+fi
+
 unzip $STORM_ZIPFILE || cleanup_and_exit $?
 
 # Build the RPM
