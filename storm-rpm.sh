@@ -35,6 +35,7 @@ STORM_VERSION=`echo $STORM_ZIPFILE | sed -r 's/^apache-storm-(.*).zip$/\1/'`
 echo "Building an RPM for Storm release version $STORM_VERSION..."
 
 # Prepare environment
+ABS_DIR=$(echo $(cd $(dirname ${STORM_DOWNLOAD_URL}); pwd))
 OLD_PWD=`pwd`
 BUILD_DIR=`mktemp -d /tmp/storm-build.XXXXXXXXXX`
 cd $BUILD_DIR
@@ -47,8 +48,10 @@ cleanup_and_exit() {
 }
 
 # Download and extract the requested Storm release zipfile
-if [ -e "$STORM_DOWNLOAD_URL" ]; then
+if [ "${STORM_DOWNLOAD_URL:0:1}" = "/" ] && [ -f "${STORM_DOWNLOAD_URL}" ]; then
     cp $STORM_DOWNLOAD_URL .
+elif [ -f "${ABS_DIR}/${STORM_DOWNLOAD_URL}" ]; then
+    cp ${ABS_DIR}/${STORM_DOWNLOAD_URL} .
 else
     wget $STORM_DOWNLOAD_URL || cleanup_and_exit $?
 fi
