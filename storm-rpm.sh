@@ -73,7 +73,7 @@ fpm -s dir -t rpm -a all \
     --iteration "1.miguno" \
     --maintainer "$MAINTAINER" \
     --vendor "Storm Project" \
-    --url http://storm-project.net \
+    --url http://storm.apache.org \
     --description "Distributed real-time computation system" \
     -p $OLD_PWD/storm-VERSION.el6.ARCH.rpm \
     -a "x86_64" \
