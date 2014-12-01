@@ -8,6 +8,9 @@
 #       Before this decision we specified the JDK dependency e.g. via the fpm option:
 #           -d "java-1.6.0-openjdk"
 
+MYSELF=`basename $0`
+MY_DIR=`echo $(cd $(dirname $0); pwd)`
+
 ### CONFIGURATION BEGINS ###
 
 INSTALL_ROOT_DIR=/opt/storm
@@ -29,13 +32,12 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-STORM_DOWNLOAD_URL="$1"
+STORM_ZIPFILE_URI="$1"
 STORM_ZIPFILE=`basename $1`
 STORM_VERSION=`echo $STORM_ZIPFILE | sed -r 's/^apache-storm-(.*).zip$/\1/'`
 echo "Building an RPM for Storm release version $STORM_VERSION..."
 
 # Prepare environment
-ABS_DIR=$(echo $(cd $(dirname ${STORM_DOWNLOAD_URL}); pwd))
 OLD_PWD=`pwd`
 BUILD_DIR=`mktemp -d /tmp/storm-build.XXXXXXXXXX`
 cd $BUILD_DIR
@@ -47,13 +49,18 @@ cleanup_and_exit() {
   exit $exitCode
 }
 
-# Download and extract the requested Storm release zipfile
-if [ "${STORM_DOWNLOAD_URL:0:1}" = "/" ] && [ -f "${STORM_DOWNLOAD_URL}" ]; then
-    cp $STORM_DOWNLOAD_URL .
-elif [ -f "${ABS_DIR}/${STORM_DOWNLOAD_URL}" ]; then
-    cp ${ABS_DIR}/${STORM_DOWNLOAD_URL} .
-else
-    wget $STORM_DOWNLOAD_URL || cleanup_and_exit $?
+URL_REGEX="^(http|https|ftp)://.*"
+# Ignore case when regex matching.
+shopt -s nocasematch
+
+# Get the Storm release zip file.
+if [[ "$STORM_ZIPFILE_URI" =~ $URL_REGEX ]]; then
+    # Download the zip file.
+    wget $STORM_ZIPFILE_URI || cleanup_and_exit $?
+elif [ -f "${STORM_ZIPFILE_URI}" ]; then
+    cp $STORM_ZIPFILE_URI . || cleanup_and_exit $?
+elif [ -f "$MY_DIR/$STORM_ZIPFILE_URI" ]; then
+    cp $MY_DIR/$STORM_ZIPFILE_URI . || cleanup_and_exit $?
 fi
 
 unzip $STORM_ZIPFILE || cleanup_and_exit $?
